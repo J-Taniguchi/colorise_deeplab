@@ -73,8 +73,7 @@ def make_xy_from_data_paths(x_paths,
 
 def make_xy_from_data_path(x_path,
                            y_path,
-                           image_size,
-                           extra_x_path=None):
+                           image_size):
     """make x and y from data path.
 
     Args:

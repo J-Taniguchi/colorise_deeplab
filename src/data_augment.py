@@ -10,16 +10,15 @@ def augmentor(in_image, out_image):
     in_image, out_image = tf.cond(
         should_apply_op,
         lambda: (tf.image.flip_left_right(in_image),
-                    tf.image.flip_left_right(out_image)),
+                 tf.image.flip_left_right(out_image)),
         lambda: (in_image, out_image))
 
     should_apply_op = tf.cast(
         tf.floor(tf.random.uniform([], dtype=tf.float32) + 0.5), tf.bool)
-
     in_image, out_image = tf.cond(
         should_apply_op,
         lambda: (tf.image.flip_up_down(in_image),
-                    tf.image.flip_up_down(out_image)),
+                 tf.image.flip_up_down(out_image)),
         lambda: (in_image, out_image))
 
     # out_image = tf.image.random_hue(out_image, 0.05)
