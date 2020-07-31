@@ -97,12 +97,10 @@ def deeplab_v3plus(image_size, n_categories):
     return model
 
 
-def deeplab_v3plus_transfer_os16(n_categories,
-                                 encoder,
+def deeplab_v3plus_transfer_os16(encoder,
                                  layer_name_to_decoder,
                                  encoder_end_layer_name,
                                  freeze_encoder=True,
-                                 output_activation='softmax',
                                  batch_renorm=False):
 
     layer_dict = dict([(layer.name, layer) for layer in encoder.layers])
@@ -133,22 +131,14 @@ def deeplab_v3plus_transfer_os16(n_categories,
 
     # decoder
     x_dec = Conv_BN(x_dec, 48, filter=1, prefix="dec1", suffix="1", strides=1, dilation_rate=1, batch_renorm=batch_renorm)
-    # print("in decoder, layer from encoder is resized from " + str(x_dec.shape[1:3]) + " to " + str(ASPP.shape[1:3]))
-    # x_dec = Resize_Layer(x_dec, ASPP.shape[1:3], name="dec1_resize")
+
     x_dec = layers.concatenate([x_dec, ASPP], name="dec_concat")
     x_dec = SepConv_BN(x_dec, 256, prefix="dec1", suffix="2", strides=1, dilation_rate=1, batch_renorm=batch_renorm)
     x_dec = SepConv_BN(x_dec, 256, prefix="dec1", suffix="3", strides=1, dilation_rate=1, batch_renorm=batch_renorm)
     x_dec = layers.UpSampling2D(4, name="dec_upsample_2")(x_dec)
-    x_dec = SepConv_BN(x_dec, n_categories, prefix="dec2", suffix="1", strides=1, dilation_rate=1, batch_renorm=batch_renorm)
+    x_dec = SepConv_BN(x_dec, 3, prefix="dec2", suffix="1", strides=1, dilation_rate=1, batch_renorm=batch_renorm)
 
-    # x_dec = SepConv_BN(x_dec, n_categories, prefix="dec2", suffix="1", strides=1, dilation_rate=1, last_activation=False)
-    # x_dec = layers.UpSampling2D(2, name="dec_upsample_3")(x_dec)
-    # x_dec = Conv_BN(x_dec, n_categories, prefix="last_dec", suffix="1", strides=1, dilation_rate=1)
-
-    if output_activation == 'softmax':
-        outputs = layers.Activation(tf.nn.softmax, name="softmax")(x_dec)
-    elif output_activation == 'sigmoid':
-        outputs = layers.Activation(tf.nn.sigmoid, name="sigmoid")(x_dec)
+    outputs = layers.Activation(tf.nn.sigmoid, name="tanh")(x_dec)
 
     model = keras.Model(inputs=inputs, outputs=outputs, name=encoder.name + "_deeplab-v3plus")
     return model

@@ -6,46 +6,28 @@ import h5py
 import numpy as np
 from glob import glob
 
-from .data_gen import make_generator, make_generator_with_extra_x
+from .data_gen import make_generator
 
 
 def make_dataset(x_dirs,
                  image_size,
-                 label,
                  preprocess,
                  batch_size,
                  y_dirs=None,
-                 extra_x_dirs=None,
-                 n_extra_channels=0,
                  data_augment=False,
                  shuffle=False):
-    if n_extra_channels == 0:
-        path_list = make_data_path_list(
-            x_dirs,
-            y_dirs=y_dirs)
-        n_data = len(path_list["x"])
-        dataset, map_f = make_generator(
-            path_list["x"],
-            image_size,
-            label,
-            seg_img_paths=path_list["y"],
-            preprocess=preprocess,
-            augmentation=data_augment,
-        )
-    else:
-        path_list = make_data_path_list(
-            x_dirs,
-            y_dirs=y_dirs,
-            extra_x_dirs=extra_x_dirs)
-        n_data = len(path_list["x"])
-        dataset, map_f = make_generator_with_extra_x(
-            path_list["x"],
-            path_list["extra_x"],
-            image_size,
-            label,
-            seg_img_paths=path_list["y"],
-            preprocess=preprocess,
-            augmentation=data_augment)
+    path_list = make_data_path_list(
+        x_dirs,
+        y_dirs=y_dirs)
+    n_data = len(path_list["x"])
+    dataset, map_f = make_generator(
+        path_list["x"],
+        image_size,
+        seg_img_paths=path_list["y"],
+        preprocess=preprocess,
+        augmentation=data_augment,
+    )
+
     if shuffle:
         dataset = dataset.shuffle(n_data)
     dataset = dataset.map(map_f, num_parallel_calls=tf.data.experimental.AUTOTUNE)

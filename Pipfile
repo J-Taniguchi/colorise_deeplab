@@ -21,4 +21,4 @@ numba = "*"
 h5py = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.8"
